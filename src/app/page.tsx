@@ -78,17 +78,54 @@ const sampleData = [
   },
 ];
 
+const allData = Array.from({ length: 30 }, (_, i) => {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const date = new Date();
+  date.setDate(date.getDate() - (29 - i));
+  return {
+    name: days[date.getDay()],
+    email: Math.floor(Math.random() * 50 + 30),
+    social: Math.floor(Math.random() * 50 + 20),
+    ads: Math.floor(Math.random() * 100 + 30),
+    leads: Math.floor(Math.random() * 60 + 20),
+    conversion: Math.floor(Math.random() * 20 + 10),
+    spend: Math.floor(Math.random() * 200 + 50),
+    date, // Keep actual Date object for filtering
+  };
+});
+
 export default function Page() {
   const [darkMode, setDarkMode] = useState(false);
   const [dateRange, setDateRange] = useState("last 7 days");
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  const totalLeads = sampleData.reduce((sum, d) => sum + d.leads, 0);
+  const filteredData = allData.filter((entry) => {
+    const now = new Date();
+    if (dateRange === "last 7 days") {
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 6);
+      return entry.date >= sevenDaysAgo;
+    }
+    if (dateRange === "last 30 days") {
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(now.getDate() - 29);
+      return entry.date >= thirtyDaysAgo;
+    }
+    if (dateRange === "this month") {
+      return (
+        entry.date.getMonth() === now.getMonth() &&
+        entry.date.getFullYear() === now.getFullYear()
+      );
+    }
+    return true;
+  });
+
+  const totalLeads = filteredData.reduce((sum, d) => sum + d.leads, 0);
   const avgConversion = (
-    sampleData.reduce((sum, d) => sum + d.conversion, 0) / sampleData.length
+    filteredData.reduce((sum, d) => sum + d.conversion, 0) / filteredData.length
   ).toFixed(1);
-  const totalSpend = sampleData.reduce((sum, d) => sum + d.spend, 0);
+  const totalSpend = filteredData.reduce((sum, d) => sum + d.spend, 0);
 
   const containerStyle = `min-h-screen p-6 transition-colors ${
     darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
@@ -151,7 +188,7 @@ export default function Page() {
       >
         <div className={cardStyle}>
           <h3 className="text-sm font-medium text-gray-400">Total Leads</h3>
-          <p className="text-2xl font-bold mt-1">{totalLeads}</p>
+          <h1 className="text-2xl font-bold mt-1">{totalLeads}</h1>
         </div>
         <div className={cardStyle}>
           <h3 className="text-sm font-medium text-gray-400">Avg. Conversion</h3>
@@ -173,7 +210,7 @@ export default function Page() {
         <div className={cardStyle}>
           <h2 className="text-lg font-semibold mb-2">Leads</h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -186,7 +223,7 @@ export default function Page() {
         <div className={cardStyle}>
           <h2 className="text-lg font-semibold mb-2">Conversion Rate</h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -199,7 +236,7 @@ export default function Page() {
         <div className={cardStyle}>
           <h2 className="text-lg font-semibold mb-2">Total Spend</h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -219,7 +256,7 @@ export default function Page() {
         <div className={cardStyle}>
           <h2 className="text-lg font-semibold mb-2">Email Performance</h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -234,7 +271,7 @@ export default function Page() {
             Social Media Performance
           </h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -247,7 +284,7 @@ export default function Page() {
         <div className={cardStyle}>
           <h2 className="text-lg font-semibold mb-2">Ads Performance</h2>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={sampleData}>
+            <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
